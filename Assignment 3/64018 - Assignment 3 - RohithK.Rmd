@@ -1,0 +1,160 @@
+---
+title: "64018 - Assignment 3"
+author: "Rohith chandra koyyala"
+date: "2022-10-19"
+output: word_document
+---
+
+The Transportation Model
+
+# Decision variables  
+Xji is the total number of AEDs shipped from plant j to warehouse i
+
+Here, (j = A,B) and (i = 1,2,3)
+
+# Answer 1 - Formulating the transportation model
+Z = 622(XPA1) +614(XPA2) +630(XPA3) +641(XPB1) +645(XPB2) +649(XPB3)
+
+Constraints 
+XPA1+XPA2+XPA3 <= 100
+XPB1+XPB2+XB3 <= 120
+XPA1+XPB1 = 80
+XPA2+XPB2 = 60
+XPA3+XPB3= 70
+and Xji >= 0
+
+# Install and use lpSolveAPI 
+```{r}
+library(lpSolve)
+library(lpSolveAPI)
+```
+
+We have 5 constraints, 6 decision variables in this problem
+```{r}
+lprec <- make.lp(5,6)
+
+# Objective function 
+set.objfn(lprec, c(622,614,630,641,645,649))
+
+# Finding the direction towards minimum
+lp.control(lprec, sense = "min")
+```
+
+Add all the constraints 
+```{r}
+
+# Using the constraint values to both the plants A and B
+
+# Production capacity constraints
+set.row(lprec, 1, c(1,1,1), indices = c(1,2,3))
+set.row(lprec, 2, c(1,1,1), indices = c(4,5,6))
+
+# Warehouse demand constraints
+set.row(lprec, 3, c(1,1), indices = c(1,4))
+set.row(lprec, 4, c(1,1), indices = c(2,5))
+set.row(lprec, 5, c(1,1), indices = c(3,6))
+
+# Formulate the right hand side values
+rhs <- c(100,120,80,60,70)
+set.rhs(lprec, rhs)
+
+# Finding the constraint type
+set.constr.type(lprec, c("<=","<=","=","=","="))
+```
+
+
+Here all the values are greater than 0 
+```{r}
+# Add the boundary conditions to the decision variables
+set.bounds(lprec, lower = rep(0, 6))
+
+# Name all the rows and columns for the problem
+lp.rownames <- c("Plant A Capacity", "Plant B Capacity", "Warehouse 1 Demand", "Warehouse 2 Demand", "Warehouse 3 Demand")
+lp.colnames <- c("PlantA to Warehouse 1", "PlantA to Warehouse 2", "PlantA to Warehouse 3", "PlantB to Warehouse 1", "PlantB to Warehouse 2", "PlantB to Warehouse 3")
+
+dimnames(lprec) <- list(lp.rownames, lp.colnames)
+```
+
+
+```{r}
+# Re-check all the values
+lprec
+```
+
+Formulating the linear programming problem to find the optimal solution. Say if the result says 0, then it the optimal solution.
+```{r}
+# Solving the linear program
+solve(lprec)
+```
+# The model returned a 0, so there is an optimal solution 
+
+Fix a minimum value to the objective function 
+```{r}
+# The value of the objective function is
+get.objective(lprec)
+```
+# The minimum shipping and production costs is $132,790 
+
+Adding the decision variables to find the production and units shipped
+
+```{r}
+# Optimum decision variable values
+get.variables(lprec)
+```
+
+# Results
+Plant A ships 0 units to Warehouse 1, 
+Plant A ships 60 units to Warehouse 2, 
+Plant A ships 40 units to Warehouse 3, 
+Plant B ships 80 units to Warehouse 1, 
+Plant B ships 0 units to Warehouse 2, 
+Plant B ships 30 units to Warehouse 3.
+
+The distribution minimizes the cost and maximize production of all the 210 units out of both the plants.
+
+# Answer 2 - Dual for the transportation model
+
+VA = Pi^j - Pi^0
+Max VA = (80p1^d +60p2^d+7op3^d)-(100p1^0-120p2^0)
+  Plant A 
+  p1^d -p1^0 >=22
+  p2^d -p1^0 >=14
+  p3^d -p1^0 >=30
+  
+  Plant B
+  p1^d -p2^o >=16
+  p2^d -p2^0 >=20
+  p3^d -p2^0 >=24
+  
+Here all non-negative variables we need pi^j >=0
+
+# Answer 3 - Concluding the economic interpretation
+
+```{r}
+# Switch the matrix to calculate the dual
+costs <- matrix(c(622,614,630,0,
+ 641,645,649,0) , ncol=4 , byrow=TRUE)
+row.signs <- rep("<=",2)
+row.rhs <- c(100,120)
+
+col.signs <- rep(">=",4)
+col.rhs <- c(80,60,70,10)
+
+
+lptrans <- lp.transport(costs, "min", row.signs, row.rhs, col.signs, col.rhs)
+lptrans$duals
+```
+
+Since we are taking the min of this specific function seeing the number go down by 19 means the shadow price is 19, that
+was found from the primal and adding 1 to each of the Plants. However with Plant B does not have a shadow price. We also
+found that the dual variable where Marginal Revenue (MR) <= Marginal Cost (MC). 
+
+# Conclusion from the primal
+60x12 which is 60 Units from Plant A to Warehouse 2.
+40x13 which is 40 Units from Plant A to Warehouse 3.
+80x21 which is 60 Units from Plant B to Warehouse 1.
+30x23 which is 60 Units from Plant B to Warehouse 3.
+from the dual
+So, MR=MC. Five of the six MR<=MC. The only equation that does not satisfy this requirement is Plant B to
+Warehouse 2. 
+The primal that we will not be shipping any AED device there.
