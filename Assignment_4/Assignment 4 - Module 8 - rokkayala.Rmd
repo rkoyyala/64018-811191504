@@ -1,0 +1,201 @@
+---
+title: "Assignment 1"
+author: "Rohith Chandra"
+date: "2022-10-31"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Question 1 - 
+
+```{r}
+# Step 1 - Creating matrix for the problem
+x <- matrix(c(150,400,320,520,350, 320, 0.2, 0.7, 1.2, 2.0, 1.2, 0.7),ncol = 2)
+y <- matrix(c(14000,14000,42000,28000,19000,14000,3500,21000,10500,42000,
+25000, 15000),ncol = 2)
+
+# Assign column names to the matrix
+colnames(x) <- c("Staff_Hours_per_day","Supplies_per_day")
+colnames(y) <- c("Reimbursed_patient_days", "Privately_paid_patient-days")
+```
+
+
+# Formulating and performing DEA analysis
+
+1. DEA Analysis using FDH
+
+```{r}
+library(Benchmarking)
+library(tidyverse)
+# Analyse DEA using FDH with the input x and output y variables
+fdh_ana = dea(x,y,RTS = "fdh")
+
+#Finding the efficiency value to dataset
+fdh_eff = as.data.frame(fdh_ana$eff)
+print(fdh_eff)
+
+
+```
+2.  DEA Analysis using CRS
+ 
+```{r}
+# Analyse DEA using CRS with input x and output y variables
+crs_ana = dea(x,y,RTS = "crs")
+
+#Finding the efficiency value to dataset
+crs_eff = as.data.frame(crs_ana$eff)
+print(crs_ana)
+
+```
+
+3. DEA Analysis using VRS
+
+```{r}
+# Analyse DEA using VRS with input x and output y variables
+vrs_ana = dea(x,y,RTS = "vrs")
+
+#Finding the efficiency value to dataset
+vrs_eff = as.data.frame(vrs_ana$eff)
+print(vrs_ana)
+
+```
+
+4. DEA Analysis using IRS
+
+```{r}
+# Analyse DEA using IRS with input x and output y values
+irs_ana <- dea(x,y,RTS = "irs")
+
+#Finding efficiency value to dataset
+irs_eff = as.data.frame(irs_ana$eff)
+print(irs_ana)
+
+```
+
+5. DEA Analysis using DRS
+
+```{r}
+# Analyse DEA using DRS with input x and output y values
+drs_ana = dea(x,y,RTS = "drs")
+
+#Finding efficiency value to dataset
+drs_eff = as.data.frame(drs_ana$eff)
+print(drs_ana)
+
+```
+
+6. DEA Analysis using FRH
+
+```{r}
+# Analyse DEA using FRH with input x and output y values
+frh_ana = dea(x,y,RTS = "add")
+
+#Finding efficiency value to dataset
+frh_eff = as.data.frame(frh_ana$eff)
+print(frh_ana)
+
+```
+
+# Question 2 - Determining the Peers and Lambdas under each of the DEA assumption
+
+1. Peers and Lambdas for FDH
+
+```{r}
+# Determining peers
+fdh_peers <- peers(fdh_ana)
+
+# Determining the weights using lambda function for the  peer values
+fdh_lamda <- lambda(fdh_ana)
+```
+
+
+2. Peers and Lambdas for CRS
+
+```{r}
+# Determining peers
+crs_peers <- peers(crs_ana)
+
+# Weights using lambda function for the  peer values
+crs_lamda <- lambda(crs_ana)
+```
+
+3. Peers and Lambdas for VRS
+
+```{r}
+# Determining peers
+vrs_peers <- peers(vrs_ana)
+
+# Weights using lambda function for the peer values
+vrs_lamda <- lambda(vrs_ana)
+```
+
+
+4. Peers and Lambdas for IRS
+
+```{r}
+# Determining peers
+irs_peers <- peers(irs_ana)
+
+# Weights using lambda function for the peer values
+irs_lamda <- lambda(irs_ana)
+```
+
+5. Peers and Lambdas for DRS
+
+```{r}
+# Determining peers
+drs_peers <- peers(drs_ana)
+
+# Weights using lambda function for the peer values
+drs_lamda <- lambda(drs_ana)
+```
+
+6. Peers and Lambdas for FDH
+
+```{r}
+# Identify the peers
+frh_peers <- peers(frh_ana)
+
+# Weights given to the peers using lambda function
+frh_lamda <- lambda(frh_ana)
+```
+
+# Question 3 - Summarizing results in a tabular format
+
+```{r}
+fdh_result <- data.frame(fdh_eff,fdh_peers, fdh_lamda)
+crs_result <- data.frame(crs_eff,crs_peers, crs_lamda)
+vrs_result <- data.frame(vrs_eff,vrs_peers, vrs_lamda)
+irs_result <- data.frame(irs_eff,irs_peers, irs_lamda)
+drs_result <- data.frame(drs_eff,drs_peers, drs_lamda)
+frh_result <- cbind(frh_eff,frh_peers, frh_lamda)
+```
+
+```{r}
+fdh_result
+crs_result
+vrs_result
+irs_result
+drs_result
+frh_result
+```
+
+```{r}
+dea.plot.isoquant(x,y,RTS = "fdh")
+dea.plot.isoquant(x,y,RTS = "crs")
+dea.plot.isoquant(x,y,RTS = "vrs")
+dea.plot.isoquant(x,y,RTS = "irs")
+dea.plot.isoquant(x,y,RTS = "drs")
+
+```
+
+# Question 4 - Comapre and contrast the above results
+
+In simple terms - 
+In FDH, the peer value was given one unit, both lamda and efficiency values are 1 and from the result table it states that every DMU and facility is having maximum capacity and effectiveness. In CRS, the lamdas and peers it is observed that the efficiency of facilities 1, 2, 3, and 4 are 100% which means they use CRS fully. The efficiency for 5 and 6 is 97.74% and 86.74% respectively which can be improved.In VRS, the lamdas and peers we can tell facilities—numbers 1, 2, 3, 4, and 5 has maximum efficieny/productivity. With facility 6, which has an efficiency of 89.63%. In IRS, Facilities 1, 2, 3, 4, and 5 operate at full productivity, IRS and VRS are both achieved. For facility 6, has 89.63% efficiency requires improvement from units 1, 2, and 5.In DRS, Facilities 1, 2, 3, and 4, Decreasing Returns to Scale (DRS) performs well in terms of efficiency and for facilities 5 and 6 needs improvement and require a portion of facilities 1, 2, and 4 in order to get maximum efficiency of 1.In FRH, all Facilities are efficient which are observed in peer and lambda.
+For the DMUs - DMU 1,2,3 & 4 have efficiencies of 1 for all DEA analysis.DMU 5 has efficiency of 1 for FDH;VRS;IRS;FRH analysis but efficiency of 0.9775 for both CRS and DRS. DMU 6 has efficiency of 1 for FDH and FRH analysis, for CRS and DRS analysis - 0.8675; VRS and IRS 0.8963. 
+
+
