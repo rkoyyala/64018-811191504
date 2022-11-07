@@ -1,0 +1,90 @@
+---
+title: "Assignment 5- QMM"
+author: "Rohith chandra koyyala"
+date: "2022-11-07"
+output: word_document
+---
+### Goal Programming
+
+1. Maximize Z = P - 6C - 3D,
+where P = total (discounted) profit over the life of the new products, 
+C = change (in either direction) in the current level of employment, 
+D = decrease (if any) in next year’s earnings from the current year’s level. 
+
+Since management is primarily focused on attaining some rise to appease the owners, 
+the quantity of any gain in earnings does not factor into Z.(It is ambivalent about a significant gain that would be hard to top in coming years.)
+
+The impact of each of the new products (per unit rate of production) on each of these factors is 
+shown in the following table: 
+  
+2)
+
+According on the problem statement, the goal is to:
+  
+Maximize Z = P - 6*C - 3*D
+
+P = total (discounted) profit over the life of the new products,
+C = change (in either direction) in the current level of employment,
+D = decrease (if any) in next year’s earnings from the current year’s level.
+
+Subject to:
+  
+  Total Profit: Maximize P = 20*X1 + 15*X2 + 25*X3
+
+Employment Level: 6*X1 + 4*X2 + 5*X3 = 50
+
+Earnings Next Year: 8*X1 + 7*X2 + 5*X3 >= 75
+
+As a result, the auxillery variables becomes:
+  
+  Y1 = 6*X1 + 4*X2 + 5*X3 - 50
+Y2 = 8*X1 + 7*X2 + 5*X3 - 75
+
+Which means:
+  
+  (Y1P - Y1M) = 6*X1 + 4*X2 + 5*X3 - 50
+(Y2P - Y2M) = 8*X1 + 7*X2 + 5*X3 - 75
+
+Therefore, the final problem statement would be like:
+  
+  Maximize Z = 20*X1 + 15*X2 + 25*X3 - 6*Y1P - 6*Y1M - 3*Y2M
+
+Subject to the following:
+  
+  6*X1 + 4*X2 + 5*X3 - (Y1P - Y1M) = 50
+8*X1 + 7*X2 + 5*X3 - (Y2P - Y2M) = 75
+
+And:
+  
+  X1, X2, X3 >= 0
+Y1P, Y1M, Y2P, Y2M >= 0
+
+finally, I am going to run linear programming model in R
+
+
+
+```{r}
+# Here we will require the "lpSolveAPI" library
+require(lpSolveAPI)
+```
+
+
+```{r}
+# Importing the .lp file for this problem
+gp_model <- read.lp("C:/Users/kramr/Downloads/Max.lp")
+# Returning the linear programming model
+gp_model
+```
+
+```{r}
+# Solving the linear programming model
+solve(gp_model)
+# Getting the objectives of linear programming model
+get.objective(gp_model)
+# Getting the variables of linear programming model
+get.variables(gp_model)
+```
+
+We can conclude a number of conclusions from the linear programming model's output.
+
+X1 = 0, X2 = 0, X3 = 15, Y1P = 25, Y1M = 0, Y2M = 0, Y2P = 0
